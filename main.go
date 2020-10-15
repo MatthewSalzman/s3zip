@@ -87,32 +87,37 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get "ref" URL params
+	// Get "prefix" URL params
 	pres, ok := r.URL.Query()["prefix"]
 	if !ok || len(pres) < 1 {
 		http.Error(w, "Prefix not specified. Pass ?prefix= to use.", 500)
 		return
 	}
-	_ = pres[0]
+	prefix := pres[0]
 
-	// Get "downloadas" URL params
-	downloadas, ok := r.URL.Query()["downloadas"]
-	if !ok && len(downloadas) > 0 {
-		downloadas[0] = makeSafeFileName.ReplaceAllString(downloadas[0], "")
-		if downloadas[0] == "" {
-			downloadas[0] = "download.zip"
-		}
+	// Get path url parms
+	// Specifys the folder name they want to write to in the zip
+	path, ok := r.URL.Query()["path"]
+	var writePath string
+	if !ok || len(pres) < 1 {
+		// if no path is specified write to root folder
+		writePath = "/"
 	} else {
-		downloadas = append(downloadas, "download.zip")
+		// If folder is specified make sure there is a trailing '/'
+		fixedPath := path[0]
+		if fixedPath[len(fixedPath)-1:] != "/" {
+			fixedPath += "/"
+		}
+		writePath = fixedPath
 	}
 
 	res, err := s3Svc.ListObjectsV2(&s3.ListObjectsV2Input{
 		Bucket: aws.String(config.Bucket),
-		Prefix: aws.String("code/MyProject/main.py"),
+		Prefix: aws.String(prefix),
 	})
 
 	// Start processing the response
-	w.Header().Add("Content-Disposition", "attachment; filename=\""+downloadas[0]+"\"")
+	w.Header().Add("Content-Disposition", "attachment; filename=\""+GetName(prefix)+".zip"+"\"")
 	w.Header().Add("Content-Type", "application/zip")
 
 	// Loop over files, add them to the
@@ -122,16 +127,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	for _, file := range res.Contents {
 		fmt.Println("File", *file)
-		filePath := *file.Key
+
 		// safeFileName := makeSafeFileName.ReplaceAllString(*file.Key, "")
 		// if safeFileName == "" { // Unlikely but just in case
 		// 	safeFileName = "file"
 		// }
 
-		// Build a good path for the file within the zip
-		zipPath := "test/"
-		zipPath += filePath
-
+		// Ge rid of prefix in zip path
+		filePath := *file.Key
+		zipPath := strings.Replace(filePath, prefix, writePath, 1)
+		fmt.Println("zipPath", zipPath)
 		h := &zip.FileHeader{
 			Name:     zipPath,
 			Method:   zip.Deflate,
@@ -154,7 +159,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			Key:    aws.String(*file.Key),
 		})
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("dl err", err)
 		}
 
 	}
@@ -166,7 +171,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 var makeSafeFileName = regexp.MustCompile(`[#<>:"/\|?*\\]`)
 
-func GetLastItem(path string) string {
+func GetName(path string) string {
 	// Returns the last item of the prefix
 	// should return either the file name or folder
 
@@ -178,5 +183,10 @@ func GetLastItem(path string) string {
 		root_item_name = s[len(s)-2]
 	}
 
-	return root_item_name
+	safeFileName := makeSafeFileName.ReplaceAllString(root_item_name, "")
+	if safeFileName == "" { // Unlikely but just in case
+		safeFileName = "file"
+	}
+
+	return safeFileName
 }
