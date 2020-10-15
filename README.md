@@ -9,8 +9,7 @@ Make an Http request to the server. Specify the s3 folder prefix of the file you
 #### prefix (required): The folder path you want to download in your s3 bucket
 Notes: 
 1. prefix does NOT start with a /
-2. Make sure to end prefix with a / to endure you are downloading that folder
-otherwise folders with the prefix as the start will be downloaded
+2. Make sure to end prefix with a / to ensure you are downloading that folder
 
 #### path: The folder path you want to write to in your zip file (default is /)
 
