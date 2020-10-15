@@ -21,7 +21,7 @@ Example : http://0.0.0.0:4005/?prefix=path/to/code/&path=/Download/
 3. Input correct options
 4. Run server > go run main.go
 
-## Inpirations 
+## Inspirations 
 https://engineroom.teamwork.com/how-to-securely-provide-a-zip-download-of-a-s3-file-bundle-1c3c779ae3f1 (github.com/Teamwork/s3zipper)
 https://dev.to/flowup/using-io-reader-io-writer-in-go-to-stream-data-3i7b
 
