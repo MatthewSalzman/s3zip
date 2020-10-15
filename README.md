@@ -6,13 +6,13 @@ A Go microservice that zips either a folder recursively or a singular item
 Make an Http request to the server. Specify the s3 folder prefix of the file you want to download as an argument to the server
 
 ### Args
-#### Prefix (required): The folder path you want to download in your s3 bucket
+#### prefix (required): The folder path you want to download in your s3 bucket
 Notes: 
 1. prefix does NOT start with a /
 2. Make sure to end prefix with a / to endure you are downloading that folder
 otherwise folders with the prefix as the start will be downloaded
 
-#### Path: The folder path you want to write to in your zip file (default is /)
+#### path: The folder path you want to write to in your zip file (default is /)
 
 Example : http://0.0.0.0:4005/?prefix=path/to/code/&path=/Download/
 
