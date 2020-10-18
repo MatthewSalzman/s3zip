@@ -26,3 +26,9 @@ https://engineroom.teamwork.com/how-to-securely-provide-a-zip-download-of-a-s3-f
 https://dev.to/flowup/using-io-reader-io-writer-in-go-to-stream-data-3i7b
 
 Note: This app isnt built to download individual files
+
+
+
+## Docker
+docker build -t "s3zip" .
+docker run -p 4005:4005 --detach s3zip
