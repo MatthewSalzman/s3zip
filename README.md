@@ -1,5 +1,5 @@
 # s3zip
-A Go microservice that zips either a folder recursively or a singular item 
+A Golang microservice that compresses an s3 folder recursively into a single zip or tar file
 
 
 ## How to use
@@ -13,22 +13,31 @@ Notes:
 
 #### path: The folder path you want to write to in your zip file (default is /)
 
-Example : http://0.0.0.0:4005/?prefix=path/to/code/&path=/Download/
+#### comp : The compression type to use on the s3 folder (default is zip)
+
+
+Example : http://0.0.0.0:4005/?prefix=path/to/code/&path=/Download/&comp=tar
 
 ## Downloading / Installing
+
+### Dev 
 1. Clone Repo
 2. Copy sample_conf.json to conf.json
 3. Input correct options
 4. Run server > go run main.go
 
-## Inspirations 
+### Prod
+Put config file somewhere accessable 
+Use docker: 
+$ docker build -t "s3zip" .
+$ docker run -p 4005:4005 --detach s3zip
+
+
+## Inspirations & Attribution
 https://engineroom.teamwork.com/how-to-securely-provide-a-zip-download-of-a-s3-file-bundle-1c3c779ae3f1 (github.com/Teamwork/s3zipper)
 https://dev.to/flowup/using-io-reader-io-writer-in-go-to-stream-data-3i7b
 
-Note: This app isnt built to download individual files
+Note: This isnt built to download individual files
 
 
 
-## Docker
-docker build -t "s3zip" .
-docker run -p 4005:4005 --detach s3zip
