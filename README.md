@@ -3,7 +3,9 @@ A Golang microservice that compresses an s3 folder recursively into a single zip
 
 
 ## How to use
-Make an Http request to the server. Specify the s3 folder prefix of the file you want to download as an argument to the server
+Make an http request to the server. Specify the s3 folder prefix of the file you want to download as an argument to the server
+
+Example : http://0.0.0.0:4005/?prefix=path/to/code/&path=/Download/&comp=tar
 
 ### Args
 #### prefix (required): The folder path you want to download in your s3 bucket
@@ -16,7 +18,6 @@ Notes:
 #### comp : The compression type to use on the s3 folder (default is zip)
 
 
-Example : http://0.0.0.0:4005/?prefix=path/to/code/&path=/Download/&comp=tar
 
 ## Downloading / Installing
 
