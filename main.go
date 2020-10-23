@@ -80,7 +80,10 @@ func main() {
 	// Run server
 	fmt.Println("Running on port", config.Port)
 	http.HandleFunc("/", handler)
-	http.ListenAndServe(":"+strconv.Itoa(config.Port), nil)
+	err = http.ListenAndServe(":"+strconv.Itoa(config.Port), nil)
+	if err != nil {
+		fmt.Println("Error starting server", err)
+	}
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -94,7 +97,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	cType, ok := r.URL.Query()["comp"]
 	if len(cType) > 0 {
-		fmt.Println("comp tpye", cType)
+		// fmt.Println("comp tpye", cType)
 		if cType[0] == "tar" {
 			compType = "tar"
 		}
@@ -130,6 +133,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
 	// Start processing the response
@@ -155,7 +159,7 @@ func tarit(w http.ResponseWriter, contents []*s3.Object) {
 	tw := tar.NewWriter(gw)
 	defer tw.Close()
 	for _, file := range contents {
-		fmt.Println("File", *file)
+		// fmt.Println("File", *file)
 		filePath := *file.Key
 		path := strings.Replace(filePath, prefix, writePath, 1)
 
@@ -189,29 +193,18 @@ func zipit(w http.ResponseWriter, contents []*s3.Object) {
 	// Create zip.Write which will writes to pipes
 
 	for _, file := range contents {
-		fmt.Println("File", *file)
-
-		// safeFileName := makeSafeFileName.ReplaceAllString(*file.Key, "")
-		// if safeFileName == "" { // Unlikely but just in case
-		// 	safeFileName = "file"
-		// }
+		// fmt.Println("File", *file)
 
 		// Ge rid of prefix in zip path
 		filePath := *file.Key
 		zipPath := strings.Replace(filePath, prefix, writePath, 1)
-		fmt.Println("zipPath", zipPath)
+		// fmt.Println("zipPath", zipPath)
 		h := &zip.FileHeader{
 			Name:     zipPath,
 			Method:   zip.Deflate,
 			Flags:    0x800,
 			Modified: *file.LastModified,
 		}
-
-		// h.SetModTime(*file.LastModified)
-
-		// if file.Modified != "" {
-		// 	h.SetModTime(file.ModifiedTime)
-		// }
 
 		f, _ := zipWriter.CreateHeader(h)
 		// Build safe file file name
@@ -252,3 +245,8 @@ func GetName(path string) string {
 
 	return safeFileName
 }
+
+// Todo:
+// 	1. Better Error handling
+// 	2. Turn any repeated code into functions
+// 	3. Add api auth/key?
