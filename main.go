@@ -21,7 +21,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/kelseyhightower/envconfig"
+	"github.com/caarlos0/env/v6"
 )
 
 var config = Configuration{}
@@ -32,11 +32,11 @@ var writePath string
 var compType string
 
 type Configuration struct {
-	AccessKey string
-	SecretKey string
-	Bucket    string
-	Region    string
-	Port      int
+	AccessKey string `env:"AccessKey"`
+	SecretKey string `env:"SecretKey"`
+	Bucket    string `env:"Bucket"`
+	Region    string `env:"Region"`
+	Port      int    `env:"Port"`
 }
 type FakeWriterAt struct {
 	w io.Writer
@@ -51,7 +51,7 @@ func GetConfig() {
 	// Get config from conf.json
 	configFile, err := os.Open("conf.json")
 	if err != nil {
-		fmt.Println("No config file")
+		fmt.Println("No config fil.. parsing from env")
 	} else {
 		// Config parsed from file
 		decoder := json.NewDecoder(configFile)
@@ -62,9 +62,12 @@ func GetConfig() {
 	}
 
 	// Get config from env variables
-	err = envconfig.Process("", &config)
-	if err != nil {
-		panic("No config in file or env")
+	// err = envconfig.Process("", &config)
+	// if err != nil {
+	// 	panic("No config in file or env")
+	// }
+	if err := env.Parse(&config); err != nil {
+		fmt.Printf("%+v\n", err)
 	}
 }
 
