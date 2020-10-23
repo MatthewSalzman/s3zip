@@ -21,6 +21,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/kelseyhightower/envconfig"
 )
 
 var config = Configuration{}
@@ -46,6 +47,27 @@ func (fw FakeWriterAt) WriteAt(p []byte, offset int64) (n int, err error) {
 	return fw.w.Write(p)
 }
 
+func GetConfig() {
+	// Get config from conf.json
+	configFile, err := os.Open("conf.json")
+	if err != nil {
+		fmt.Println("No config file")
+	} else {
+		// Config parsed from file
+		decoder := json.NewDecoder(configFile)
+		err = decoder.Decode(&config)
+		if err != nil {
+			panic("Error reading conf")
+		}
+	}
+
+	// Get config from env variables
+	err = envconfig.Process("", &config)
+	if err != nil {
+		panic("No config in file or env")
+	}
+}
+
 func initS3() {
 	creds := credentials.NewStaticCredentials(config.AccessKey, config.SecretKey, "")
 	sess, err := session.NewSession(&aws.Config{
@@ -68,19 +90,14 @@ func initS3() {
 
 func main() {
 	// Parse config
-	configFile, _ := os.Open("conf.json")
-	decoder := json.NewDecoder(configFile)
-	err := decoder.Decode(&config)
-	if err != nil {
-		panic("Error reading conf")
-	}
+	GetConfig()
 	// Init s3
 	initS3()
 
 	// Run server
 	fmt.Println("Running on port", config.Port)
 	http.HandleFunc("/", handler)
-	err = http.ListenAndServe(":"+strconv.Itoa(config.Port), nil)
+	err := http.ListenAndServe(":"+strconv.Itoa(config.Port), nil)
 	if err != nil {
 		fmt.Println("Error starting server", err)
 	}
